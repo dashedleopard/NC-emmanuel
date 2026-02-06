@@ -20,7 +20,9 @@ const formatDailyMessage = (greeting, wisdom, fact, dayOfWeek, dayOfMonth) => {
 
 ${wisdomEmoji} Penguin Wisdom: "${wisdom}"
 
-${factEmoji} Fun Fact: ${fact}`;
+${factEmoji} Fun Fact: ${fact}
+
+🔗 View the celebration: https://larry-steve-penguins-temp.vercel.app/`;
 };
 
 /**
