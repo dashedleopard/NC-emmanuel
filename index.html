@@ -110,43 +110,118 @@
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            gap: 0;
             margin: 0 auto 32px;
-            height: 260px;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            height: 280px;
+            overflow: visible;
         }
 
-        .scene.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .scene.celebrating .penguin-wrap {
+        .scene.celebrating .hug-group {
             animation: celebrate-bounce 1.2s ease-in-out infinite;
         }
 
-        .scene.celebrating .penguin-wrap:nth-child(3) {
-            animation-delay: 0.15s;
-        }
-
-        /* Ice platform */
+        /* Ice platform — starts wide for the run, shrinks on hug */
         .ice-platform {
             position: absolute;
             bottom: 0;
-            width: 340px;
+            width: 100vw;
+            max-width: 700px;
             height: 40px;
             background: linear-gradient(180deg, rgba(200, 230, 255, 0.9) 0%, rgba(160, 210, 245, 0.6) 100%);
             border-radius: 20px;
             box-shadow: 0 4px 30px rgba(100, 180, 255, 0.2), inset 0 -2px 8px rgba(255, 255, 255, 0.3);
+            transition: width 0.6s ease 1.8s, max-width 0.6s ease 1.8s;
+        }
+
+        .scene.hugged .ice-platform {
+            width: 280px;
+            max-width: 280px;
+        }
+
+        /* Hugging group — 3D perspective */
+        .hug-group {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 1;
+            margin-bottom: 20px;
+            perspective: 600px;
         }
 
         .penguin-wrap {
             position: relative;
-            width: 130px;
+            width: 120px;
+            transform-style: preserve-3d;
+        }
+
+        /* === ENTRANCE: penguins start off-screen === */
+        .penguin-wrap.larry {
+            z-index: 2;
+            margin-right: 0;
+            transform: translateX(-55vw) rotateY(0deg) rotateZ(0deg);
+            animation: run-in-larry 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        .penguin-wrap.steve {
             z-index: 1;
-            margin-bottom: 20px;
+            margin-left: 0;
+            transform: translateX(55vw) rotateY(0deg) rotateZ(0deg);
+            animation: run-in-steve 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        /* Larry runs in from left with waddle */
+        @keyframes run-in-larry {
+            0% {
+                transform: translateX(-55vw) rotateY(0deg) rotateZ(0deg);
+                margin-right: 0;
+            }
+            10% { transform: translateX(-48vw) rotateY(0deg) rotateZ(-8deg); }
+            20% { transform: translateX(-38vw) rotateY(0deg) rotateZ(8deg); }
+            30% { transform: translateX(-28vw) rotateY(0deg) rotateZ(-8deg); }
+            40% { transform: translateX(-19vw) rotateY(0deg) rotateZ(8deg); }
+            50% { transform: translateX(-12vw) rotateY(0deg) rotateZ(-8deg); }
+            60% { transform: translateX(-6vw) rotateY(0deg) rotateZ(8deg); }
+            70% { transform: translateX(-2vw) rotateY(-5deg) rotateZ(-4deg); }
+            80% { transform: translateX(0vw) rotateY(-10deg) rotateZ(2deg); }
+            90% { transform: translateX(0) rotateY(-15deg) rotateZ(3deg); margin-right: -20px; }
+            100% {
+                transform: translateX(0) rotateY(-18deg) rotateZ(3deg);
+                margin-right: -30px;
+            }
+        }
+
+        /* Steve runs in from right with waddle */
+        @keyframes run-in-steve {
+            0% {
+                transform: translateX(55vw) rotateY(0deg) rotateZ(0deg);
+                margin-left: 0;
+            }
+            10% { transform: translateX(48vw) rotateY(0deg) rotateZ(8deg); }
+            20% { transform: translateX(38vw) rotateY(0deg) rotateZ(-8deg); }
+            30% { transform: translateX(28vw) rotateY(0deg) rotateZ(8deg); }
+            40% { transform: translateX(19vw) rotateY(0deg) rotateZ(-8deg); }
+            50% { transform: translateX(12vw) rotateY(0deg) rotateZ(8deg); }
+            60% { transform: translateX(6vw) rotateY(0deg) rotateZ(-8deg); }
+            70% { transform: translateX(2vw) rotateY(5deg) rotateZ(4deg); }
+            80% { transform: translateX(0vw) rotateY(10deg) rotateZ(-2deg); }
+            90% { transform: translateX(0) rotateY(15deg) rotateZ(-3deg); margin-left: -20px; }
+            100% {
+                transform: translateX(0) rotateY(18deg) rotateZ(-3deg);
+                margin-left: -30px;
+            }
+        }
+
+        /* After run-in completes, lock into hug pose */
+        .scene.hugged .penguin-wrap.larry {
+            animation: none;
+            margin-right: -30px;
+            transform: rotateY(-18deg) rotateZ(3deg);
+        }
+
+        .scene.hugged .penguin-wrap.steve {
+            animation: none;
+            margin-left: -30px;
+            transform: rotateY(18deg) rotateZ(-3deg);
         }
 
         .penguin-name {
@@ -164,25 +239,50 @@
             height: 180px;
             display: block;
             margin: 0 auto;
-            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+            filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.4)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
         }
 
-        /* Heart between penguins */
-        .heart-link {
-            position: relative;
-            width: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 60px;
-            z-index: 2;
-            font-size: 28px;
-            animation: pulse-heart 2s ease-in-out infinite;
+        /* Ground shadow under the pair */
+        .hug-group::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 14px;
+            background: radial-gradient(ellipse, rgba(0, 0, 0, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        /* Heart floating above the hug — hidden until they meet */
+        .heart-float {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            font-size: 32px;
+            z-index: 10;
+            opacity: 0;
+            filter: drop-shadow(0 2px 8px rgba(255, 100, 100, 0.5));
+            transition: none;
+        }
+
+        /* Heart pops in after hug */
+        .scene.hugged .heart-float {
+            animation: heart-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                       pulse-heart 2s ease-in-out 0.5s infinite;
+        }
+
+        @keyframes heart-pop-in {
+            0% { transform: translateX(-50%) scale(0); opacity: 0; }
+            50% { transform: translateX(-50%) scale(1.4); opacity: 1; }
+            100% { transform: translateX(-50%) scale(1); opacity: 1; }
         }
 
         @keyframes pulse-heart {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.15); }
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.2); }
         }
 
         @keyframes celebrate-bounce {
@@ -190,7 +290,27 @@
             40% { transform: translateY(-20px); }
         }
 
-        /* Flag */
+        /* 3D sway during celebration (overrides hugged pose) */
+        .scene.celebrating.hugged .penguin-wrap.larry {
+            animation: sway-larry 1.4s ease-in-out infinite;
+        }
+
+        .scene.celebrating.hugged .penguin-wrap.steve {
+            animation: sway-steve 1.4s ease-in-out infinite;
+            animation-delay: 0.1s;
+        }
+
+        @keyframes sway-larry {
+            0%, 100% { transform: rotateY(-18deg) rotateZ(3deg); }
+            50% { transform: rotateY(-12deg) rotateZ(5deg) translateY(-4px); }
+        }
+
+        @keyframes sway-steve {
+            0%, 100% { transform: rotateY(18deg) rotateZ(-3deg); }
+            50% { transform: rotateY(12deg) rotateZ(-5deg) translateY(-4px); }
+        }
+
+        /* Static flag on Larry */
         .flag-container {
             position: absolute;
             top: -10px;
@@ -223,13 +343,164 @@
             box-shadow: 0 2px 8px rgba(238, 68, 68, 0.3);
         }
 
-        .scene.celebrating .flag-banner {
-            animation: flag-wave 0.6s ease-in-out infinite alternate;
+        /* Flying flags during celebration */
+        .flying-flag {
+            position: fixed;
+            z-index: 999;
+            pointer-events: none;
+            width: 64px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff6b6b, #ee4444);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 900;
+            font-family: 'Nunito', sans-serif;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 16px rgba(238, 68, 68, 0.4);
+            animation: fly-around var(--duration) linear infinite;
+            opacity: 0;
         }
 
-        @keyframes flag-wave {
-            0% { transform: scaleX(1) rotate(0deg); }
-            100% { transform: scaleX(0.92) rotate(-6deg); }
+        .flying-flag.active {
+            opacity: 1;
+        }
+
+        @keyframes fly-around {
+            0% {
+                top: 50%;
+                left: -80px;
+                transform: rotate(0deg);
+            }
+            15% {
+                top: 10%;
+                left: 30%;
+                transform: rotate(15deg);
+            }
+            30% {
+                top: 5%;
+                left: 70%;
+                transform: rotate(-10deg);
+            }
+            45% {
+                top: 40%;
+                left: 95%;
+                transform: rotate(20deg);
+            }
+            60% {
+                top: 80%;
+                left: 60%;
+                transform: rotate(-15deg);
+            }
+            75% {
+                top: 70%;
+                left: 20%;
+                transform: rotate(10deg);
+            }
+            90% {
+                top: 30%;
+                left: 5%;
+                transform: rotate(-20deg);
+            }
+            100% {
+                top: 50%;
+                left: -80px;
+                transform: rotate(0deg);
+            }
+        }
+
+        @keyframes fly-around-2 {
+            0% {
+                top: 20%;
+                left: calc(100% + 80px);
+                transform: rotate(0deg);
+            }
+            15% {
+                top: 70%;
+                left: 65%;
+                transform: rotate(-12deg);
+            }
+            30% {
+                top: 85%;
+                left: 30%;
+                transform: rotate(18deg);
+            }
+            45% {
+                top: 50%;
+                left: 5%;
+                transform: rotate(-8deg);
+            }
+            60% {
+                top: 15%;
+                left: 25%;
+                transform: rotate(15deg);
+            }
+            75% {
+                top: 10%;
+                left: 70%;
+                transform: rotate(-20deg);
+            }
+            90% {
+                top: 45%;
+                left: 90%;
+                transform: rotate(12deg);
+            }
+            100% {
+                top: 20%;
+                left: calc(100% + 80px);
+                transform: rotate(0deg);
+            }
+        }
+
+        @keyframes fly-around-3 {
+            0% {
+                top: 90%;
+                left: 50%;
+                transform: rotate(5deg);
+            }
+            12% {
+                top: 60%;
+                left: 10%;
+                transform: rotate(-15deg);
+            }
+            25% {
+                top: 20%;
+                left: 15%;
+                transform: rotate(10deg);
+            }
+            37% {
+                top: 5%;
+                left: 50%;
+                transform: rotate(-5deg);
+            }
+            50% {
+                top: 15%;
+                left: 85%;
+                transform: rotate(20deg);
+            }
+            62% {
+                top: 50%;
+                left: 90%;
+                transform: rotate(-10deg);
+            }
+            75% {
+                top: 80%;
+                left: 75%;
+                transform: rotate(15deg);
+            }
+            87% {
+                top: 85%;
+                left: 35%;
+                transform: rotate(-18deg);
+            }
+            100% {
+                top: 90%;
+                left: 50%;
+                transform: rotate(5deg);
+            }
         }
 
         /* Countdown */
@@ -331,82 +602,151 @@
         <div class="status" id="status">Waiting for 1:26 PM...</div>
 
         <div class="scene" id="scene">
-            <!-- Larry -->
-            <div class="penguin-wrap">
-                <div class="penguin-name">Larry</div>
-                <svg class="penguin-svg" viewBox="0 0 120 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Body -->
-                    <ellipse cx="60" cy="120" rx="42" ry="55" fill="#1a2332"/>
-                    <!-- Belly -->
-                    <ellipse cx="60" cy="125" rx="28" ry="42" fill="white"/>
-                    <!-- Head -->
-                    <ellipse cx="60" cy="55" rx="36" ry="32" fill="#1a2332"/>
-                    <!-- Face -->
-                    <ellipse cx="60" cy="60" rx="24" ry="18" fill="white"/>
-                    <!-- Eyes -->
-                    <ellipse cx="50" cy="52" rx="8" ry="9" fill="white" stroke="#1a2332" stroke-width="1.5"/>
-                    <ellipse cx="70" cy="52" rx="8" ry="9" fill="white" stroke="#1a2332" stroke-width="1.5"/>
-                    <circle cx="51" cy="52" r="4.5" fill="#1a1a2e"/>
-                    <circle cx="71" cy="52" r="4.5" fill="#1a1a2e"/>
-                    <circle cx="49" cy="50" r="1.8" fill="white"/>
-                    <circle cx="69" cy="50" r="1.8" fill="white"/>
-                    <!-- Cheeks -->
-                    <ellipse cx="40" cy="62" rx="7" ry="5" fill="#ff9eb8" opacity="0.6"/>
-                    <ellipse cx="80" cy="62" rx="7" ry="5" fill="#ff9eb8" opacity="0.6"/>
-                    <!-- Beak -->
-                    <path d="M54 65 L60 74 L66 65 Z" fill="#ffb347"/>
-                    <!-- Wings -->
-                    <ellipse cx="20" cy="110" rx="14" ry="32" fill="#1a2332" transform="rotate(-10, 20, 110)"/>
-                    <ellipse cx="100" cy="110" rx="14" ry="32" fill="#1a2332" transform="rotate(10, 100, 110)"/>
-                    <!-- Feet -->
-                    <ellipse cx="45" cy="172" rx="14" ry="6" fill="#ffb347"/>
-                    <ellipse cx="75" cy="172" rx="14" ry="6" fill="#ffb347"/>
-                </svg>
-                <div class="flag-container">
-                    <div class="flag-pole">
-                        <div class="flag-banner">1:26</div>
+            <div class="hug-group">
+                <!-- Heart above the hug -->
+                <div class="heart-float">&#10084;&#65039;</div>
+
+                <!-- Larry (left, leans right) -->
+                <div class="penguin-wrap larry">
+                    <div class="penguin-name">Larry</div>
+                    <svg class="penguin-svg" viewBox="0 0 120 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <!-- 3D body gradient — light hits from the left -->
+                            <radialGradient id="lBody" cx="40%" cy="35%" r="60%">
+                                <stop offset="0%" stop-color="#2a3a4e"/>
+                                <stop offset="100%" stop-color="#0f1820"/>
+                            </radialGradient>
+                            <radialGradient id="lBelly" cx="45%" cy="30%" r="65%">
+                                <stop offset="0%" stop-color="#ffffff"/>
+                                <stop offset="100%" stop-color="#d8e4ec"/>
+                            </radialGradient>
+                            <radialGradient id="lHead" cx="40%" cy="30%" r="60%">
+                                <stop offset="0%" stop-color="#2e4058"/>
+                                <stop offset="100%" stop-color="#0f1820"/>
+                            </radialGradient>
+                            <radialGradient id="lWingL" cx="50%" cy="30%" r="70%">
+                                <stop offset="0%" stop-color="#263648"/>
+                                <stop offset="100%" stop-color="#0d151e"/>
+                            </radialGradient>
+                            <radialGradient id="lWingR" cx="40%" cy="30%" r="70%">
+                                <stop offset="0%" stop-color="#263648"/>
+                                <stop offset="100%" stop-color="#0d151e"/>
+                            </radialGradient>
+                        </defs>
+                        <!-- Body -->
+                        <ellipse cx="60" cy="120" rx="42" ry="55" fill="url(#lBody)"/>
+                        <!-- Body highlight -->
+                        <ellipse cx="48" cy="105" rx="16" ry="28" fill="white" opacity="0.06"/>
+                        <!-- Belly -->
+                        <ellipse cx="60" cy="125" rx="28" ry="42" fill="url(#lBelly)"/>
+                        <!-- Head -->
+                        <ellipse cx="62" cy="55" rx="36" ry="32" fill="url(#lHead)"/>
+                        <!-- Head highlight -->
+                        <ellipse cx="50" cy="44" rx="14" ry="10" fill="white" opacity="0.08"/>
+                        <!-- Face -->
+                        <ellipse cx="62" cy="60" rx="24" ry="18" fill="url(#lBelly)"/>
+                        <!-- Eyes — looking toward Steve -->
+                        <ellipse cx="52" cy="52" rx="8" ry="9" fill="white" stroke="#1a2332" stroke-width="1.5"/>
+                        <ellipse cx="72" cy="52" rx="8" ry="9" fill="white" stroke="#1a2332" stroke-width="1.5"/>
+                        <circle cx="54" cy="52" r="4.5" fill="#1a1a2e"/>
+                        <circle cx="74" cy="52" r="4.5" fill="#1a1a2e"/>
+                        <circle cx="52" cy="50" r="1.8" fill="white"/>
+                        <circle cx="72" cy="50" r="1.8" fill="white"/>
+                        <!-- Cheeks -->
+                        <ellipse cx="42" cy="62" rx="8" ry="6" fill="#ff9eb8" opacity="0.7"/>
+                        <ellipse cx="82" cy="62" rx="8" ry="6" fill="#ff9eb8" opacity="0.7"/>
+                        <!-- Beak -->
+                        <path d="M56 65 L62 74 L68 65 Z" fill="#ffb347"/>
+                        <path d="M58 65 L62 71 L66 65 Z" fill="#ffc56b" opacity="0.5"/>
+                        <!-- Left wing (outer) -->
+                        <ellipse cx="18" cy="110" rx="14" ry="32" fill="url(#lWingL)" transform="rotate(-10, 18, 110)"/>
+                        <!-- Right wing (reaching around Steve) -->
+                        <ellipse cx="108" cy="100" rx="14" ry="36" fill="url(#lWingR)" transform="rotate(25, 108, 100)"/>
+                        <!-- Feet -->
+                        <ellipse cx="45" cy="172" rx="14" ry="6" fill="#ffb347"/>
+                        <ellipse cx="75" cy="172" rx="14" ry="6" fill="#ffb347"/>
+                        <ellipse cx="43" cy="171" rx="8" ry="3" fill="#ffc56b" opacity="0.4"/>
+                        <ellipse cx="73" cy="171" rx="8" ry="3" fill="#ffc56b" opacity="0.4"/>
+                    </svg>
+                    <div class="flag-container">
+                        <div class="flag-pole">
+                            <div class="flag-banner">1:26</div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Heart -->
-            <div class="heart-link">&#10084;&#65039;</div>
-
-            <!-- Steve -->
-            <div class="penguin-wrap">
-                <div class="penguin-name">Steve</div>
-                <svg class="penguin-svg" viewBox="0 0 120 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Body -->
-                    <ellipse cx="60" cy="120" rx="42" ry="55" fill="#1a2332"/>
-                    <!-- Belly -->
-                    <ellipse cx="60" cy="125" rx="28" ry="42" fill="white"/>
-                    <!-- Head -->
-                    <ellipse cx="60" cy="55" rx="36" ry="32" fill="#1a2332"/>
-                    <!-- Face -->
-                    <ellipse cx="60" cy="60" rx="24" ry="18" fill="white"/>
-                    <!-- Eyes -->
-                    <ellipse cx="50" cy="52" rx="8" ry="9" fill="white" stroke="#1a2332" stroke-width="1.5"/>
-                    <ellipse cx="70" cy="52" rx="8" ry="9" fill="white" stroke="#1a2332" stroke-width="1.5"/>
-                    <circle cx="51" cy="52" r="4.5" fill="#1a1a2e"/>
-                    <circle cx="71" cy="52" r="4.5" fill="#1a1a2e"/>
-                    <circle cx="49" cy="50" r="1.8" fill="white"/>
-                    <circle cx="69" cy="50" r="1.8" fill="white"/>
-                    <!-- Cheeks -->
-                    <ellipse cx="40" cy="62" rx="7" ry="5" fill="#ff9eb8" opacity="0.6"/>
-                    <ellipse cx="80" cy="62" rx="7" ry="5" fill="#ff9eb8" opacity="0.6"/>
-                    <!-- Beak -->
-                    <path d="M54 65 L60 74 L66 65 Z" fill="#ffb347"/>
-                    <!-- Wings -->
-                    <ellipse cx="20" cy="110" rx="14" ry="32" fill="#1a2332" transform="rotate(-10, 20, 110)"/>
-                    <ellipse cx="100" cy="110" rx="14" ry="32" fill="#1a2332" transform="rotate(10, 100, 110)"/>
-                    <!-- Feet -->
-                    <ellipse cx="45" cy="172" rx="14" ry="6" fill="#ffb347"/>
-                    <ellipse cx="75" cy="172" rx="14" ry="6" fill="#ffb347"/>
-                </svg>
+                <!-- Steve (right, leans left) -->
+                <div class="penguin-wrap steve">
+                    <div class="penguin-name">Steve</div>
+                    <svg class="penguin-svg" viewBox="0 0 120 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <!-- 3D body gradient — light hits from the right -->
+                            <radialGradient id="sBody" cx="60%" cy="35%" r="60%">
+                                <stop offset="0%" stop-color="#2a3a4e"/>
+                                <stop offset="100%" stop-color="#0f1820"/>
+                            </radialGradient>
+                            <radialGradient id="sBelly" cx="55%" cy="30%" r="65%">
+                                <stop offset="0%" stop-color="#ffffff"/>
+                                <stop offset="100%" stop-color="#d8e4ec"/>
+                            </radialGradient>
+                            <radialGradient id="sHead" cx="60%" cy="30%" r="60%">
+                                <stop offset="0%" stop-color="#2e4058"/>
+                                <stop offset="100%" stop-color="#0f1820"/>
+                            </radialGradient>
+                            <radialGradient id="sWingL" cx="50%" cy="30%" r="70%">
+                                <stop offset="0%" stop-color="#263648"/>
+                                <stop offset="100%" stop-color="#0d151e"/>
+                            </radialGradient>
+                            <radialGradient id="sWingR" cx="40%" cy="30%" r="70%">
+                                <stop offset="0%" stop-color="#263648"/>
+                                <stop offset="100%" stop-color="#0d151e"/>
+                            </radialGradient>
+                        </defs>
+                        <!-- Body -->
+                        <ellipse cx="60" cy="120" rx="42" ry="55" fill="url(#sBody)"/>
+                        <!-- Body highlight -->
+                        <ellipse cx="72" cy="105" rx="16" ry="28" fill="white" opacity="0.06"/>
+                        <!-- Belly -->
+                        <ellipse cx="60" cy="125" rx="28" ry="42" fill="url(#sBelly)"/>
+                        <!-- Head -->
+                        <ellipse cx="58" cy="55" rx="36" ry="32" fill="url(#sHead)"/>
+                        <!-- Head highlight -->
+                        <ellipse cx="70" cy="44" rx="14" ry="10" fill="white" opacity="0.08"/>
+                        <!-- Face -->
+                        <ellipse cx="58" cy="60" rx="24" ry="18" fill="url(#sBelly)"/>
+                        <!-- Eyes — looking toward Larry -->
+                        <ellipse cx="48" cy="52" rx="8" ry="9" fill="white" stroke="#1a2332" stroke-width="1.5"/>
+                        <ellipse cx="68" cy="52" rx="8" ry="9" fill="white" stroke="#1a2332" stroke-width="1.5"/>
+                        <circle cx="46" cy="52" r="4.5" fill="#1a1a2e"/>
+                        <circle cx="66" cy="52" r="4.5" fill="#1a1a2e"/>
+                        <circle cx="44" cy="50" r="1.8" fill="white"/>
+                        <circle cx="64" cy="50" r="1.8" fill="white"/>
+                        <!-- Cheeks -->
+                        <ellipse cx="38" cy="62" rx="8" ry="6" fill="#ff9eb8" opacity="0.7"/>
+                        <ellipse cx="78" cy="62" rx="8" ry="6" fill="#ff9eb8" opacity="0.7"/>
+                        <!-- Beak -->
+                        <path d="M52 65 L58 74 L64 65 Z" fill="#ffb347"/>
+                        <path d="M54 65 L58 71 L62 65 Z" fill="#ffc56b" opacity="0.5"/>
+                        <!-- Left wing (reaching around Larry) -->
+                        <ellipse cx="12" cy="100" rx="14" ry="36" fill="url(#sWingL)" transform="rotate(-25, 12, 100)"/>
+                        <!-- Right wing (outer) -->
+                        <ellipse cx="102" cy="110" rx="14" ry="32" fill="url(#sWingR)" transform="rotate(10, 102, 110)"/>
+                        <!-- Feet -->
+                        <ellipse cx="45" cy="172" rx="14" ry="6" fill="#ffb347"/>
+                        <ellipse cx="75" cy="172" rx="14" ry="6" fill="#ffb347"/>
+                        <ellipse cx="47" cy="171" rx="8" ry="3" fill="#ffc56b" opacity="0.4"/>
+                        <ellipse cx="77" cy="171" rx="8" ry="3" fill="#ffc56b" opacity="0.4"/>
+                    </svg>
+                </div>
             </div>
 
             <div class="ice-platform"></div>
         </div>
+
+        <!-- Flying flags (hidden until celebration) -->
+        <div class="flying-flag" id="flag1" style="--duration: 4s; animation-name: fly-around;">1:26</div>
+        <div class="flying-flag" id="flag2" style="--duration: 5s; animation-name: fly-around-2;">1:26</div>
+        <div class="flying-flag" id="flag3" style="--duration: 6s; animation-name: fly-around-3;">1:26</div>
 
         <div class="countdown" id="countdown"></div>
 
@@ -449,10 +789,10 @@
             }
         })();
 
-        // --- Scene entrance ---
-        requestAnimationFrame(() => {
-            document.getElementById('scene').classList.add('visible');
-        });
+        // --- Scene entrance: penguins run in, then lock into hug ---
+        setTimeout(() => {
+            document.getElementById('scene').classList.add('hugged');
+        }, 2100); // slightly after the 2s run-in animation ends
 
         // --- Clock & Celebration ---
         let isWaving = false;
@@ -504,6 +844,9 @@
             status.classList.add('celebrating');
             status.textContent = 'LARRY & STEVE ARE CELEBRATING!';
 
+            // Launch the flying flags
+            document.querySelectorAll('.flying-flag').forEach(f => f.classList.add('active'));
+
             playFanfare();
             launchFireworks();
 
@@ -527,6 +870,9 @@
             scene.classList.remove('celebrating');
             status.classList.remove('celebrating');
             status.textContent = 'See you tomorrow at 1:26 PM!';
+
+            // Hide flying flags
+            document.querySelectorAll('.flying-flag').forEach(f => f.classList.remove('active'));
 
             setTimeout(() => {
                 status.textContent = 'Waiting for 1:26 PM...';
