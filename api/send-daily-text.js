@@ -23,6 +23,27 @@ module.exports = async (req, res) => {
 
     const client = twilio(accountSid, authToken);
 
+    // Deduplication: check if we already sent a text today (prevents duplicate triggers)
+    const todayStart = new Date();
+    todayStart.setUTCHours(0, 0, 0, 0);
+
+    const sentToday = await client.messages.list({
+      from: twilioNumber,
+      dateSentAfter: todayStart,
+      limit: 1
+    });
+
+    if (sentToday.length > 0) {
+      console.log('Daily text already sent today, skipping duplicate');
+      return res.status(200).json({
+        success: true,
+        skipped: true,
+        reason: 'Daily text already sent today',
+        existingMessageSid: sentToday[0].sid,
+        sentAt: sentToday[0].dateSent
+      });
+    }
+
     // Parse multiple recipient numbers (comma-separated)
     const recipients = recipientNumbers.split(',').map(num => num.trim());
     console.log(`Sending to ${recipients.length} recipient(s):`, recipients);
