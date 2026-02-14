@@ -171,11 +171,100 @@ const penguinImages = [
   "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Manchot_royal_-_King_Penguin.jpg/800px-Manchot_royal_-_King_Penguin.jpg"
 ];
 
+// The date Larry & Steve started sending texts (for streak counting)
+const BOT_START_DATE = '2026-01-27';
+
+// Calculate streak (days since start)
+const getStreak = () => {
+  const start = new Date(BOT_START_DATE + 'T00:00:00');
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return Math.floor((now - start) / (1000 * 60 * 60 * 24));
+};
+
+// Milestone messages for streak celebrations
+const milestones = {
+  7:   "ONE WEEK of Larry & Steve! 🎉",
+  14:  "TWO WEEKS! Larry & Steve are unstoppable! 🎊",
+  25:  "DAY 25! A quarter century of penguin love! 🏆",
+  30:  "ONE MONTH! Larry & Steve's monthly-versary! 🥳",
+  50:  "DAY 50! Half a hundred! Larry & Steve are legends! 🌟",
+  75:  "DAY 75! Three quarters of a century of waddles! ✨",
+  100: "DAY 100!!! TRIPLE DIGITS! 🐧👑🐧",
+  150: "DAY 150! Larry & Steve have been at it for 5 months! 🎆",
+  200: "DAY 200! You've officially received 200 penguin texts! 💎",
+  365: "ONE YEAR OF LARRY & STEVE! 🎂🐧🎂",
+};
+
+// Special day messages keyed by "MM-DD"
+const specialDays = {
+  '01-01': { emoji: '🎆', greeting: "Happy New Year from Larry & Steve! New year, new waddles!" },
+  '02-02': { emoji: '🐿️', greeting: "It's Groundhog Day! Larry & Steve see their shadow... more winter!" },
+  '02-14': { emoji: '💕', greeting: "Happy Valentine's Day! Larry & Steve love you the MOST!" },
+  '03-17': { emoji: '🍀', greeting: "Happy St. Patrick's Day! Larry & Steve are feeling lucky!" },
+  '04-01': { emoji: '🤡', greeting: "April Fools! Larry & Steve tried to fly today... didn't work!" },
+  '04-22': { emoji: '🌍', greeting: "Happy Earth Day! Larry & Steve say protect the ice caps!" },
+  '04-25': { emoji: '🐧', greeting: "WORLD PENGUIN DAY! Larry & Steve's favorite holiday!" },
+  '05-04': { emoji: '⭐', greeting: "May the 4th be with you! Larry & Steve are Jedi penguins!" },
+  '07-04': { emoji: '🎆', greeting: "Happy 4th of July! Larry & Steve celebrate with fish fireworks!" },
+  '09-22': { emoji: '🍂', greeting: "Happy first day of fall! Larry & Steve love the cold coming!" },
+  '10-31': { emoji: '🎃', greeting: "Happy Halloween! Larry & Steve are dressed as... penguins! 👻" },
+  '11-28': { emoji: '🦃', greeting: "Happy Thanksgiving! Larry & Steve are thankful for YOU!" },
+  '12-21': { emoji: '❄️', greeting: "Winter Solstice! The longest night — Larry & Steve's dream!" },
+  '12-24': { emoji: '🎄', greeting: "Christmas Eve! Larry & Steve left you fish under the tree!" },
+  '12-25': { emoji: '🎅', greeting: "Merry Christmas from Larry & Steve! Ho ho ho-nk!" },
+  '12-31': { emoji: '🥂', greeting: "New Year's Eve! Larry & Steve are counting down!" },
+};
+
+// Get special day info for today (or null)
+const getSpecialDay = (month, day) => {
+  const key = String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+  return specialDays[key] || null;
+};
+
+// 20 penguin trivia questions with multiple choice
+const triviaQuestions = [
+  { q: "How many species of penguins exist?", a: "A) 10", b: "B) 18", c: "C) 25", correct: "B", fact: "There are 18 recognized species of penguins!" },
+  { q: "Which is the tallest penguin species?", a: "A) King", b: "B) Emperor", c: "C) Gentoo", correct: "B", fact: "Emperor penguins can reach up to 4 feet tall!" },
+  { q: "Where do Galapagos penguins live?", a: "A) Antarctica", b: "B) Near the equator", c: "C) Arctic", correct: "B", fact: "They're the only penguins that live north of the equator!" },
+  { q: "How fast can Gentoo penguins swim?", a: "A) 10 mph", b: "B) 22 mph", c: "C) 35 mph", correct: "B", fact: "Gentoo penguins are the fastest swimming penguin species!" },
+  { q: "What is a group of penguins in water called?", a: "A) A raft", b: "B) A school", c: "C) A pod", correct: "A", fact: "In water they're a raft, on land they're a waddle!" },
+  { q: "How long can Emperor penguins hold their breath?", a: "A) 5 min", b: "B) 12 min", c: "C) 22 min", correct: "C", fact: "Emperor penguins can hold their breath for an incredible 22 minutes!" },
+  { q: "What do penguins use to attract mates?", a: "A) Dancing", b: "B) Pebbles", c: "C) Singing", correct: "B", fact: "Adelie penguins gift pebbles to their partners!" },
+  { q: "Which penguin has yellow head feathers?", a: "A) Macaroni", b: "B) Chinstrap", c: "C) Little Blue", correct: "A", fact: "Macaroni penguins have distinctive yellow crests!" },
+  { q: "How deep can Emperor penguins dive?", a: "A) 500 ft", b: "B) 1,000 ft", c: "C) 1,800 ft", correct: "C", fact: "Emperor penguins can dive over 1,800 feet deep!" },
+  { q: "What is the smallest penguin species?", a: "A) Rockhopper", b: "B) Fairy/Little Blue", c: "C) African", correct: "B", fact: "Little Blue (Fairy) penguins are only about 13 inches tall!" },
+  { q: "How do penguins stay warm in huddles?", a: "A) Body heat sharing", b: "B) They don't get cold", c: "C) Underground burrows", correct: "A", fact: "Emperor penguins rotate positions so everyone stays warm!" },
+  { q: "Can penguins taste their food?", a: "A) Yes, fully", b: "B) Only salty & sour", c: "C) No taste at all", correct: "B", fact: "Penguins lost the ability to taste sweet, savory, and bitter!" },
+  { q: "How old are the oldest penguin fossils?", a: "A) 10M years", b: "B) 35M years", c: "C) 62M years", correct: "C", fact: "Penguin fossils date back about 62 million years!" },
+  { q: "Which continent has NO penguins?", a: "A) Asia", b: "B) South America", c: "C) Africa", correct: "A", fact: "Penguins live on every Southern Hemisphere continent but not Asia!" },
+  { q: "What keeps penguin feathers waterproof?", a: "A) Oil gland", b: "B) Wax coating", c: "C) Dense layers", correct: "A", fact: "Penguins spread oil from a gland near their tail!" },
+  { q: "How long do Emperor dads incubate eggs?", a: "A) 2 weeks", b: "B) 2 months", c: "C) 6 months", correct: "B", fact: "Emperor dads balance the egg on their feet for about 65 days!" },
+  { q: "What color is a penguin chick's first coat?", a: "A) Black & white", b: "B) Gray/brown", c: "C) All white", correct: "B", fact: "Most penguin chicks are covered in gray or brown fluffy down!" },
+  { q: "Which penguin is named for its face marking?", a: "A) Emperor", b: "B) Chinstrap", c: "C) King", correct: "B", fact: "Chinstrap penguins have a thin black band under their chin!" },
+  { q: "How many feathers per sq inch do penguins have?", a: "A) 20", b: "B) 50", c: "C) 100", correct: "C", fact: "About 100 feathers per square inch — more than almost any bird!" },
+  { q: "What is penguin courtship called?", a: "A) Ecstatic display", b: "B) Mating dance", c: "C) Fish offering", correct: "A", fact: "The ecstatic display involves stretching, calling, and flipper waving!" },
+];
+
+// Get today's trivia question (deterministic by date)
+const getTodaysTrivia = () => {
+  const now = new Date();
+  const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+  return triviaQuestions[dayOfYear % triviaQuestions.length];
+};
+
 module.exports = {
   dailyMessages,
   penguinWisdom,
   penguinFacts,
   penguinJokes,
   penguinImages,
-  getRandomItem
+  getRandomItem,
+  BOT_START_DATE,
+  getStreak,
+  milestones,
+  specialDays,
+  getSpecialDay,
+  triviaQuestions,
+  getTodaysTrivia
 };

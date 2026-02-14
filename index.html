@@ -583,12 +583,134 @@
             }
         }
 
+        /* Streak badge */
+        .streak-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(255, 215, 0, 0.15);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 20px;
+            color: #ffd700;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: 0.5px;
+        }
+
+        .streak-badge .milestone {
+            display: block;
+            font-size: 11px;
+            color: rgba(255, 215, 0, 0.6);
+            margin-top: 2px;
+        }
+
+        /* Outfit accessories (positioned above penguin heads via JS) */
+        .accessory {
+            position: absolute;
+            font-size: 28px;
+            z-index: 20;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            pointer-events: none;
+        }
+
+        .penguin-wrap.larry .accessory {
+            top: 2px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-8deg);
+        }
+
+        .penguin-wrap.steve .accessory {
+            top: 2px;
+            left: 50%;
+            transform: translateX(-50%) rotate(8deg);
+        }
+
+        /* Fish mini-game */
+        .game-area {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 200px;
+            margin: 16px auto;
+            border-radius: 16px;
+            background: rgba(0, 20, 50, 0.4);
+            border: 1px solid rgba(100, 180, 255, 0.2);
+            overflow: hidden;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            display: none;
+        }
+
+        .game-area.active {
+            display: block;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 14px;
+            font-size: 14px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .game-fish {
+            position: absolute;
+            font-size: 28px;
+            cursor: pointer;
+            transition: none;
+            user-select: none;
+            -webkit-user-select: none;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .game-fish.caught {
+            transform: scale(1.5);
+            opacity: 0;
+            transition: all 0.2s ease-out;
+        }
+
+        .game-splash {
+            position: absolute;
+            font-size: 16px;
+            color: #ffd700;
+            font-weight: 800;
+            pointer-events: none;
+            animation: splash-up 0.6s ease-out forwards;
+        }
+
+        @keyframes splash-up {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-30px) scale(1.2); opacity: 0; }
+        }
+
+        .game-toggle {
+            padding: 8px 20px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all 0.2s;
+        }
+
+        .game-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
         /* Responsive */
         @media (max-width: 480px) {
             .clock { font-size: 48px; }
             .status { font-size: 17px; }
             .scene { height: 220px; transform: scale(0.85); }
             .container { padding: 16px; }
+            .game-area { height: 160px; }
         }
     </style>
 </head>
@@ -748,13 +870,26 @@
         <div class="flying-flag" id="flag2" style="--duration: 5s; animation-name: fly-around-2;">1:26</div>
         <div class="flying-flag" id="flag3" style="--duration: 6s; animation-name: fly-around-3;">1:26</div>
 
+        <div class="streak-badge" id="streakBadge"></div>
+
         <div class="countdown" id="countdown"></div>
+
+        <!-- Fish catching mini-game -->
+        <div class="game-area" id="gameArea">
+            <div class="game-header">
+                <span>Catch fish for Larry & Steve!</span>
+                <span id="gameScore">Score: 0</span>
+            </div>
+        </div>
+
+        <button class="game-toggle" id="gameToggle">Catch Fish While You Wait</button>
 
         <button class="test-button" id="testButton">Test the Celebration</button>
 
         <div class="info">
             Larry & Steve wave every day at 1:26 PM ET<br>
-            Keep this page open to catch the show
+            Keep this page open to catch the show<br>
+            Text HELP to the bot for interactive commands!
         </div>
     </div>
 
@@ -974,6 +1109,174 @@
         document.getElementById('testButton').addEventListener('click', () => {
             if (!isWaving) startCelebration();
         });
+
+        // --- Streak Badge ---
+        (function initStreak() {
+            const startDate = new Date('2026-01-27T00:00:00');
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            const streak = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+
+            const milestones = { 7:'1 Week!', 14:'2 Weeks!', 25:'Quarter Century!', 30:'1 Month!',
+                50:'Half Century!', 75:'75 Days!', 100:'Triple Digits!', 150:'5 Months!',
+                200:'200 Days!', 365:'1 Year!' };
+
+            const badge = document.getElementById('streakBadge');
+            let html = `Day ${streak} of Larry & Steve`;
+
+            // Find next milestone
+            const nextMilestone = Object.keys(milestones).map(Number).sort((a,b) => a-b).find(m => m > streak);
+            if (milestones[streak]) {
+                html += ` 🏅<span class="milestone">${milestones[streak]}</span>`;
+            } else if (nextMilestone) {
+                html += `<span class="milestone">${nextMilestone - streak} days to next milestone</span>`;
+            }
+            badge.innerHTML = html;
+        })();
+
+        // --- Daily Outfits ---
+        (function initOutfits() {
+            const outfits = [
+                { larry: '🎩', steve: '🎩' },   // Top hats
+                { larry: '👑', steve: '🎀' },   // Crown & bow
+                { larry: '🧢', steve: '🎓' },   // Cap & grad hat
+                { larry: '🎅', steve: '🤶' },   // Santa
+                { larry: '👓', steve: '🕶️' },   // Glasses
+                { larry: '🪖', steve: '⛑️' },   // Helmets
+                { larry: '🌺', steve: '🌻' },   // Flowers
+                { larry: '🏴‍☠️', steve: '🦜' },  // Pirate
+                { larry: '🎭', steve: '🎪' },   // Theater
+                { larry: '🧙', steve: '🧝' },   // Fantasy
+                { larry: '🤠', steve: '🤠' },   // Cowboy
+                { larry: '👒', steve: '💐' },   // Spring
+                { larry: '🎧', steve: '🎤' },   // Music
+                { larry: '🏆', steve: '🥇' },   // Champions
+            ];
+
+            const now = new Date();
+            const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+            const outfit = outfits[dayOfYear % outfits.length];
+
+            // Add accessory elements
+            const larryWrap = document.querySelector('.penguin-wrap.larry');
+            const steveWrap = document.querySelector('.penguin-wrap.steve');
+
+            if (larryWrap) {
+                const acc = document.createElement('div');
+                acc.className = 'accessory';
+                acc.textContent = outfit.larry;
+                larryWrap.appendChild(acc);
+            }
+            if (steveWrap) {
+                const acc = document.createElement('div');
+                acc.className = 'accessory';
+                acc.textContent = outfit.steve;
+                steveWrap.appendChild(acc);
+            }
+        })();
+
+        // --- Fish Catching Mini-Game ---
+        (function initFishGame() {
+            const gameArea = document.getElementById('gameArea');
+            const scoreEl = document.getElementById('gameScore');
+            const toggleBtn = document.getElementById('gameToggle');
+            let score = 0;
+            let gameActive = false;
+            let spawnInterval = null;
+
+            const fishTypes = ['🐟', '🐠', '🐡', '🦐', '🦑', '🦀'];
+
+            toggleBtn.addEventListener('click', () => {
+                gameActive = !gameActive;
+                gameArea.classList.toggle('active', gameActive);
+                toggleBtn.textContent = gameActive ? 'Stop Fishing' : 'Catch Fish While You Wait';
+
+                if (gameActive) {
+                    score = 0;
+                    scoreEl.textContent = 'Score: 0';
+                    spawnFish();
+                    spawnInterval = setInterval(spawnFish, 1200);
+                } else {
+                    clearInterval(spawnInterval);
+                    // Remove all fish
+                    gameArea.querySelectorAll('.game-fish').forEach(f => f.remove());
+                }
+            });
+
+            function spawnFish() {
+                if (!gameActive) return;
+
+                const fish = document.createElement('div');
+                fish.className = 'game-fish';
+                fish.textContent = fishTypes[Math.floor(Math.random() * fishTypes.length)];
+
+                const areaRect = gameArea.getBoundingClientRect();
+                const x = 20 + Math.random() * (areaRect.width - 60);
+                fish.style.left = x + 'px';
+                fish.style.top = '30px';
+
+                // Fall speed — gets faster as score increases
+                const fallDuration = Math.max(1.5, 3 - score * 0.05);
+                const startTime = Date.now();
+
+                gameArea.appendChild(fish);
+
+                // Animate falling
+                function fall() {
+                    if (!gameActive) { fish.remove(); return; }
+                    const elapsed = (Date.now() - startTime) / 1000;
+                    const progress = elapsed / fallDuration;
+                    const maxY = areaRect.height - 40;
+                    fish.style.top = (30 + progress * maxY) + 'px';
+
+                    // Gentle side-to-side sway
+                    fish.style.left = (x + Math.sin(elapsed * 3) * 15) + 'px';
+
+                    if (progress >= 1) {
+                        fish.remove(); // Missed!
+                    } else {
+                        requestAnimationFrame(fall);
+                    }
+                }
+
+                requestAnimationFrame(fall);
+
+                // Click to catch
+                fish.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (fish.classList.contains('caught')) return;
+
+                    fish.classList.add('caught');
+                    score++;
+                    scoreEl.textContent = `Score: ${score}`;
+
+                    // Splash effect
+                    const splash = document.createElement('div');
+                    splash.className = 'game-splash';
+                    splash.textContent = '+1';
+                    splash.style.left = fish.style.left;
+                    splash.style.top = fish.style.top;
+                    gameArea.appendChild(splash);
+
+                    setTimeout(() => { fish.remove(); splash.remove(); }, 300);
+
+                    // Mini sound
+                    try {
+                        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.frequency.value = 800 + score * 20;
+                        osc.type = 'sine';
+                        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                        osc.start(ctx.currentTime);
+                        osc.stop(ctx.currentTime + 0.1);
+                    } catch (e) {}
+                });
+            }
+        })();
 
         // --- Init ---
         setInterval(updateClock, 1000);
