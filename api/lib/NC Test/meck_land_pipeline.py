@@ -51,6 +51,9 @@ def load_config() -> Config:
         if x.strip()
     ]
     va_email_to = [x.strip() for x in os.getenv("VA_EMAIL_TO", "").split(",") if x.strip()]
+    smtp_port_raw = (os.getenv("SMTP_PORT") or "").strip()
+    smtp_port = int(smtp_port_raw) if smtp_port_raw else 587
+
     return Config(
         vacant_layer_url=os.getenv(
             "GIS_VACANT_LAYER_URL",
@@ -74,7 +77,7 @@ def load_config() -> Config:
         service_account_json=os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", "").strip(),
         va_email_to=va_email_to,
         smtp_host=os.getenv("SMTP_HOST", "").strip(),
-        smtp_port=int(os.getenv("SMTP_PORT", "587")),
+        smtp_port=smtp_port,
         smtp_user=os.getenv("SMTP_USER", "").strip(),
         smtp_password=os.getenv("SMTP_PASSWORD", "").strip(),
         smtp_from=os.getenv("SMTP_FROM", "").strip(),
